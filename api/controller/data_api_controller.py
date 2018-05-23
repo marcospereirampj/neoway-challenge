@@ -42,6 +42,17 @@ class DataApiController(Resource):
 
         return {'message': result, 'status': 200}
 
+    @swag_from('swagger/data_api_controller_put.yml')
+    def put(self):
+        """
+        Process data from CSV file.
+        """
+        parse = reqparse.RequestParser()
+        filename = self._save_file(parse)
+        result = self._data_process.update(self._directory + filename)
+
+        return {'message': result, 'status': 200}
+
     @swag_from('swagger/data_api_controller_get.yml')
     def get(self):
         return self._data_restore.restore("/media/DATA/workspace/personal/neoway-challenge/data/q1_catalog.csv")

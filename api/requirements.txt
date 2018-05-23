@@ -5,3 +5,4 @@ Flask-Injector==0.10.0
 injector==0.13.1
 flask-restful==0.3.6
 pytest==3.5.1
+elasticsearch==6.2.0
