@@ -43,7 +43,7 @@ class DocModule(Module):
             ],
             "static_url_path": "/flasgger_static",
             "swagger_ui": True,
-            "specs_route": "/docs/"
+            "specs_route": "/"
         }
 
         Swagger(self.app, template=template, config=swagger_config)
