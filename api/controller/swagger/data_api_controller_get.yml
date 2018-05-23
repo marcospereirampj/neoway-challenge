@@ -1,0 +1,21 @@
+Return all data from databese
+---
+tags:
+  - data-integration
+definitions:
+  Data:
+    type: object
+    properties:
+      hash_object:
+        type: string
+      addressZip:
+        type: string
+      name:
+        type: string
+produces:
+  - application/json
+responses:
+  200:
+    description: List all objects from database
+    schema:
+      $ref: '#/definitions/Data'

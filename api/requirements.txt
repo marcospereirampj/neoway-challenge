@@ -4,3 +4,4 @@ Flask-Cors==3.0.3
 Flask-Injector==0.10.0
 injector==0.13.1
 flask-restful==0.3.6
+pytest

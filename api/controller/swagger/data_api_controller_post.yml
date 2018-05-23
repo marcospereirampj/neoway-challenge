@@ -1,0 +1,13 @@
+Load data from CSV file.
+---
+tags:
+  - data-integration
+produces:
+  - application/json
+responses:
+  200:
+    description: Result of file operation.
+  400:
+    description: Bad request.
+  500:
+    description: Failed to process file.
