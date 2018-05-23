@@ -2,8 +2,10 @@
 
 import hashlib
 
+from controller.custom.custom_api_error import ProcessFileError
 
-class DataRestore:
+
+class DataProcess:
 
     def restore(self, input_file_path):
         """
@@ -25,7 +27,7 @@ class DataRestore:
                     else:
                         self._update_datebase(self._process_line(line, headers))
         except Exception as err:
-            return "Failed to process file: {}.".format(err)
+            raise ProcessFileError()
 
         return "File successfully processed."
 
