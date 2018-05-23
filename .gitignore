@@ -1,2 +1,5 @@
 .idea/
 data/
+files/
+.pytest_cache/
+__pycache__/
