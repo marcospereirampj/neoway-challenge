@@ -55,4 +55,10 @@ class DataApiController(Resource):
 
     @swag_from('swagger/data_api_controller_get.yml')
     def get(self):
-        return self._data_restore.restore("/media/DATA/workspace/personal/neoway-challenge/data/q1_catalog.csv")
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('search')
+        parser.add_argument('scroll_id')
+        args = parser.parse_args()
+
+        return self._data_process.retrieve(args['search'], args.get('scroll_id'))

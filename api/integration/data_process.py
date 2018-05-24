@@ -5,7 +5,7 @@ import hashlib
 from elasticsearch import Elasticsearch, helpers
 
 from config.default import Config
-from controller.custom.custom_api_error import ProcessFileError
+from controller.custom.custom_api_error import ProcessFileError, InitialImportError
 
 
 class DataProcess:
@@ -15,6 +15,9 @@ class DataProcess:
         self._document_type = Config.ELASTICSEARCH_DOCUMENT_TYPE
         self._index = Config.ELASTICSEARCH_INDEX
         self._elastic_search.indices.create(index=self._index, ignore=400)
+
+    def retrieve(self, search, scroll_id=None):
+        return self._read_database(search, scroll_id)
 
     def restore(self, input_file_path):
         """
@@ -26,6 +29,9 @@ class DataProcess:
         is_header = True
         headers = []
         data_bulk = []
+
+        if self._count_database() > 0:
+            raise InitialImportError()
 
         try:
             # Read largest files
@@ -77,7 +83,7 @@ class DataProcess:
         :param line: header line.
         :return: values.
         """
-        return [i.strip() for i in line.split(';')]
+        return [i.strip().lower() for i in line.split(';')]
 
     def _process_line(self, line, headers):
         """
@@ -99,6 +105,7 @@ class DataProcess:
                 if field_name.lower() in ['name', 'addresszip']:
                     keys.append(str(fields[item]))
 
+            result['website'] = result['website'] if result.get('website') else None
             result['hash_object'] = self._create_hash_line(keys)
 
             return result
@@ -140,3 +147,45 @@ class DataProcess:
             pass
 
         return
+
+    def _read_database(self, search, scroll_id):
+
+        if not scroll_id:
+            result = self._elastic_search.search(index=self._index,
+                                                 doc_type=self._document_type,
+                                                 body=self._get_query_dsl(search),
+                                                 **{"scroll": "1m", "size": 100})
+        else:
+            result = self._elastic_search.scroll(scroll='1m', scroll_id=scroll_id)
+
+        response = {
+            "data": [self._format_response(result) for result in result['hits']['hits']],
+            "count": result['hits']['total'],
+            "scroll": result['_scroll_id']
+        }
+
+        return response
+
+    def _count_database(self):
+        count = self._elastic_search.count(index=self._index, doc_type=self._document_type)
+        return count["count"]
+
+    def _get_query_dsl(self, search):
+        query_dsl = None
+
+        if search:
+            query_dsl = {
+                "_source": ["name", "addresszip", "website"],
+                "query": {
+                    "match": {
+                        "name": search
+                    }
+                }
+            }
+
+        return query_dsl
+
+    def _format_response(self, data):
+        response_formatted = data['_source']
+        response_formatted.update({'id': data['_id']})
+        return response_formatted

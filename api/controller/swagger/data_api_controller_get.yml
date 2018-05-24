@@ -6,12 +6,25 @@ definitions:
   Data:
     type: object
     properties:
-      hash_object:
-        type: string
-      addressZip:
-        type: string
       name:
         type: string
+      addresszip:
+        type: string
+      website:
+        type: string
+parameters:
+- in: query
+  name: search
+  schema:
+    type: string
+  required: false
+  description: Key for search in 'name' and 'addresszip'
+- in: query
+  name: scroll_id
+  schema:
+    type: string
+  required: false
+  description: The next elements from result
 produces:
   - application/json
 responses:
