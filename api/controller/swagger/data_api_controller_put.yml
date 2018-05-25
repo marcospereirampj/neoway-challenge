@@ -1,4 +1,7 @@
-Update database from CSV file.
+Process data from CSV file (database update).
+
+curl -X PUT "http://{{url}}/data-integration" -H "content-type:multipart/form-data" -F file=@data/q2_clientData.csv
+
 ---
 tags:
   - data-integration

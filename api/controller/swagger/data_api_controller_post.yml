@@ -1,12 +1,21 @@
-Load database from CSV file.
+Process data from CSV file (initial load data).
+
+curl -X POST "http://{{url}}/data-integration" -H "content-type:multipart/form-data" -F file=@./data/q1_catalog.csv
+
 ---
 tags:
   - data-integration
 produces:
   - application/json
+requestBody:
+  content:
+    multipart/form-data:
+      schema:
+          type: string
+          format: binary
 responses:
   200:
-    description: Result of file operation.
+    description: The result of operation..
   400:
     description: Bad request.
   500:
