@@ -1,10 +1,10 @@
-#Challenge Makefile
+# Challenge Makefile
 
 start:
-#TODO: commands necessary to start the API
+# commands
 
 check:
-#TODO: include command to test the code and show the results
+	python -m unittest discover -s api -p "*_test.py"
 
-#setup:
-#if needed to setup the enviroment before starting it
+requirements: api/requirements.txt
+	pip install -r api/requirements.txt
