@@ -9,6 +9,10 @@ from controller.custom.custom_api_error import ProcessFileError, InitialImportEr
 
 
 class DataProcess:
+    """
+    Class responsible to process the CSV file. It's responsible for load initial data in the database,
+    update and retrieve data.
+    """
 
     def __init__(self):
         self._elastic_search = Elasticsearch([{'host': Config.ELASTICSEARCH_HOST, 'port': Config.ELASTICSEARCH_PORT}])
@@ -16,15 +20,25 @@ class DataProcess:
         self._index = Config.ELASTICSEARCH_INDEX
         self._elastic_search.indices.create(index=self._index, ignore=400)
 
-    def retrieve(self, search, scroll_id=None):
-        return self._read_database(search, scroll_id)
+    def retrieve(self, name, addresszip, scroll_id=None):
+        """
+        Retrieve objects from database.
+
+        :param name: Key for search in name field.
+        :param addresszip: Key for search in zip field
+        :param scroll_id: Page (or scroll)
+
+        :return: List of objects from the database
+
+        """
+        return self._read_database(name, addresszip, scroll_id)
 
     def restore(self, input_file_path):
         """
-        Read a file, process and return dict with values.
+        Read a file, process and insert values into the database (initial load).
 
-        :param input_file_path: File path
-        :return: True if successful restore
+        :param input_file_path: File path.
+        :return: Operation result.
         """
         is_header = True
         headers = []
@@ -53,10 +67,10 @@ class DataProcess:
 
     def update(self, input_file_path):
         """
-        Read a file, process and return dict with values.
+        Read a file, process and insert values into the database (database update).
 
-        :param input_file_path: File path
-        :return: True if successful restore
+        :param input_file_path: File path.
+        :return: Operation result.
         """
         is_header = True
         headers = []
@@ -91,7 +105,7 @@ class DataProcess:
 
         :param line: line from CSV file.
         :param headers: keys for result dict
-        :return: values
+        :return: values (dict)
         """
         fields = [i.strip() for i in line.split(';')]
 
@@ -100,7 +114,9 @@ class DataProcess:
             keys = []
 
             for item, field_name in enumerate(headers):
-                result[field_name] = fields[item]
+
+                field_name_formatted = field_name.lower() if field_name.lower() != 'addresszip' else 'zip'
+                result[field_name_formatted] = fields[item]
 
                 if field_name.lower() in ['name', 'addresszip']:
                     keys.append(str(fields[item]))
@@ -114,17 +130,22 @@ class DataProcess:
 
     def _create_hash_line(self, keys):
         """
-        Create a hash identification for line
+        Create a hash code from the line data.
 
         :param keys: keys for hash generation.
-        :return: hash
+        :return: hash code.
         """
 
         hash = hashlib.sha256(''.join(keys).encode('utf-8'))
         return hash.hexdigest()
 
     def _insert_bulk_database(self, data):
+        """
+        Insert data bulk into the database.
 
+        :param data: data bulk.
+        :return:
+        """
         actions = [
             {
                 "_index": self._index,
@@ -136,8 +157,15 @@ class DataProcess:
         ]
 
         helpers.bulk(self._elastic_search, actions)
+        return
 
     def _update_database(self, data):
+        """
+        Update an exists object into the database.
+
+        :param data: object data.
+        :return:
+        """
         try:
             self._elastic_search.update(index=self._index,
                                         doc_type=self._document_type,
@@ -148,12 +176,21 @@ class DataProcess:
 
         return
 
-    def _read_database(self, search, scroll_id):
+    def _read_database(self, name, addresszip, scroll_id):
+        """
+        Retrieve objects from database.
+
+        :param name: Key for search in name field.
+        :param addresszip: Key for search in zip field
+        :param scroll_id: Page (or scroll)
+
+        :return: List of objects from the database
+        """
 
         if not scroll_id:
             result = self._elastic_search.search(index=self._index,
                                                  doc_type=self._document_type,
-                                                 body=self._get_query_dsl(search),
+                                                 body=self._get_query_dsl(name, addresszip),
                                                  **{"scroll": "1m", "size": 100})
         else:
             result = self._elastic_search.scroll(scroll='1m', scroll_id=scroll_id)
@@ -167,18 +204,38 @@ class DataProcess:
         return response
 
     def _count_database(self):
+        """
+        Count objects in the database.
+
+        :return: the number of objects.
+        """
         count = self._elastic_search.count(index=self._index, doc_type=self._document_type)
         return count["count"]
 
-    def _get_query_dsl(self, search):
-        query_dsl = None
+    def _get_query_dsl(self, name, addresszip):
+        """
+        Create query (DSL).
 
-        if search:
+        :param name: Key for search in name field.
+        :param addresszip: Key for search in zip field
+
+        :return: query
+        """
+        query_dsl = None
+        must = []
+
+        if name:
+            must.append({"match": {"name": name}})
+
+        if addresszip:
+            must.append({"match": {"zip": addresszip}})
+
+        if must:
             query_dsl = {
-                "_source": ["name", "addresszip", "website"],
+                "_source": ["name", "zip", "website"],
                 "query": {
-                    "match": {
-                        "name": search
+                    "bool": {
+                        "must": must
                     }
                 }
             }
@@ -186,6 +243,12 @@ class DataProcess:
         return query_dsl
 
     def _format_response(self, data):
+        """
+        Format response.
+
+        :param data: list of objects
+        :return: list of objects formatted.
+        """
         response_formatted = data['_source']
         response_formatted.update({'id': data['_id']})
         return response_formatted
