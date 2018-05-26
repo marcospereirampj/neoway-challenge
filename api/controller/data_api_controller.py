@@ -13,7 +13,7 @@ class DataApiController(Resource):
     Class responsible for API. Process HTTP requests.
     """
 
-    def __init__(self, directory='files/'):
+    def __init__(self, directory='/tmp/'):
         self._data_process = DataProcess()
         self._directory = directory
 
