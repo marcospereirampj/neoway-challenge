@@ -228,7 +228,7 @@ class DataProcess:
 
         :return: query
         """
-        query_dsl = None
+        query_dsl = {"_source": ["name", "zip", "website"]}
         must = []
 
         if name:
@@ -238,12 +238,9 @@ class DataProcess:
             must.append({"match": {"zip": addresszip}})
 
         if must:
-            query_dsl = {
-                "_source": ["name", "zip", "website"],
-                "query": {
-                    "bool": {
-                        "must": must
-                    }
+            query_dsl['query'] = {
+                "bool": {
+                    "must": must
                 }
             }
 

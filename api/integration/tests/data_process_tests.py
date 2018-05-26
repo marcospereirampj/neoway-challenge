@@ -5,7 +5,7 @@
 from unittest import TestCase, mock
 
 from config.default import Config
-from controller.custom.custom_api_error import ConnectionElasticSearchError, ProcessFileError
+from controller.custom.custom_api_error import ConnectionElasticSearchError, ProcessFileError, InitialImportError
 from integration.data_process import DataProcess
 
 
@@ -254,6 +254,16 @@ class DataProcessTest(TestCase):
             result = self._data_process.restore('/tmp/inputDataNotFound.csv')
         except Exception as err:
             self.assertEqual(True, isinstance(err, ProcessFileError))
+
+    def test_fail_initial_database_restore(self):
+        """Initial recovery fail test. """
+
+        self._data_process._count_database = mock.MagicMock(return_value=1)
+
+        try:
+            result = self._data_process.restore('/tmp/inputData.csv')
+        except Exception as err:
+            self.assertEqual(True, isinstance(err, InitialImportError))
 
     def test_success_update(self):
         """ Tests update database successfully (ignored invalid lines). """
