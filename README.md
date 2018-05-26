@@ -69,7 +69,7 @@ See [Data Integration challenge in NeowayLabs](https://github.com/NeowayLabs/dat
 
 
 ```
-   python -m unittest discover -s api -p "*_test.py"
+   python -m unittest discover -p *tests.py
 ```
 
 ## Design
