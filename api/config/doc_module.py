@@ -20,9 +20,15 @@ class DocModule(Module):
             "swagger": "2.0",
             "info": {
                 'title': 'Data API',
-                "description": "Data API for Data Integration team. "
-                               "Data Integration team is focused on combining data from different heterogeneous "
-                               "sources and providing it to an unified view into entities.",
+                "description":
+                    """
+Data API for Data Integration team.                            
+                               
+See original [Data Integration challenge in NeowayLabs](https://github.com/NeowayLabs/data-integration-challenge).
+                               
+See DATA API - Online:  
+[http://neoway.marcospereirajr.com.br/](http://neoway.marcospereirajr.com.br/)
+                    """,
                 "contact": {
                     "responsibleOrganization": "Yawoen",
                 },
