@@ -35,12 +35,12 @@ See [Data Integration challenge in NeowayLabs](https://github.com/NeowayLabs/dat
             \ - data_api_controller_put.yml
         \ - tests
             \ - __init__.py
-            \ - data_api_controller_test.py
+            \ - data_api_controller_tests.py
         \ - __init__.py
         \ - data_api_controller.py
     \ - integration
         \ - tests
-            \ - data_process_test.py
+            \ - data_process_tests.py
         \ - __init__.py
         \ - data_process.py
     \ - __init__.py
