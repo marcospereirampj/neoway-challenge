@@ -5,7 +5,7 @@ import hashlib
 from elasticsearch import Elasticsearch, helpers
 
 from config.default import Config
-from controller.custom.custom_api_error import ProcessFileError, InitialImportError
+from controller.custom.custom_api_error import ProcessFileError, InitialImportError, ConnectionElasticSearchError
 
 
 class DataProcess:
@@ -15,10 +15,15 @@ class DataProcess:
     """
 
     def __init__(self):
-        self._elastic_search = Elasticsearch([{'host': Config.ELASTICSEARCH_HOST, 'port': Config.ELASTICSEARCH_PORT}])
-        self._document_type = Config.ELASTICSEARCH_DOCUMENT_TYPE
-        self._index = Config.ELASTICSEARCH_INDEX
-        self._elastic_search.indices.create(index=self._index, ignore=400)
+
+        try:
+            self._elastic_search = Elasticsearch(
+                [{'host': Config.ELASTICSEARCH_HOST, 'port': Config.ELASTICSEARCH_PORT}])
+            self._document_type = Config.ELASTICSEARCH_DOCUMENT_TYPE
+            self._index = Config.ELASTICSEARCH_INDEX
+            self._elastic_search.indices.create(index=self._index, ignore=400)
+        except Exception as err:
+            raise ConnectionElasticSearchError()
 
     def retrieve(self, name, addresszip, scroll_id=None):
         """
@@ -56,7 +61,9 @@ class DataProcess:
                         is_header = False
                     else:
                         data = self._process_line(line, headers)
-                        data_bulk.append(data)
+
+                        if data:
+                            data_bulk.append(data)
 
             self._insert_bulk_database(data_bulk)
 

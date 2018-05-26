@@ -11,23 +11,23 @@ class DataApiControllerTest(unittest.TestCase):
     def setUpClass(cls):
         pass
 
-    def post_success_test(self):
+    def test_post_success(self):
         pass
 
-    def put_success_test(self):
+    def test_put_success(self):
         pass
 
-    def retrieve_success_test(self):
+    def test_retrieve_success(self):
         pass
 
-    def post_initial_import_error_test(self):
+    def test_post_initial_import_error(self):
         pass
 
-    def post_invalid_file_test(self):
+    def test_post_invalid_file(self):
         pass
 
-    def put_empty_database_test(self):
+    def test_put_empty_database(self):
         pass
 
-    def put_invalid_file_test(self):
+    def test_put_invalid_file(self):
         pass
