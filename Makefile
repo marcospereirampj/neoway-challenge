@@ -1,10 +1,16 @@
 # Challenge Makefile
 
+default:
+	@echo "Running project:"
+	@echo "    make start         # Starts a Flask development server locally (open http://localhost:5000/)."
+	@echo "    make check         # Tests entire application."
+	@echo "    make setup         # Install requirements."
+
 start:
-# commands
+	PYTHONPATH=./api/ python api/run.py
 
 check:
-	python -m unittest discover -s api -p "*_test.py"
+	PYTHONPATH=./api/ python -m unittest discover -p *tests.py
 
-requirements: api/requirements.txt
+setup:
 	pip install -r api/requirements.txt
