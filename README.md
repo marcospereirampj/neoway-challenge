@@ -1,78 +1,132 @@
 # Data integration challenge
 
-
 Welcome to Data Integration challenge.
 
-Yawoen company has hired you to implement a Data API for Data Integration team.
+Example - Online:  
+[http://neoway.marcospereirajr.com.br/](http://neoway.marcospereirajr.com.br/)
 
-Data Integration team is focused on combining data from different heterogeneous sources and providing it to an unified view into entities.
+## Original challenge
 
-## The challenge
+See [Data Integration challenge in NeowayLabs](https://github.com/NeowayLabs/data-integration-challenge).
 
-### 1 - Load company data in a database
+## Stack 
 
-Read data from CSV file and load into the database to create an entity named **companies**.
-
-This entity should contain the following fields: id, company name and zip code. 
-
-support file: q1_catalog.csv
-
-
-### 2 - An API to integrate data using a database
-
-Yawoen now wants to get website data from another source and integrate it with the entity you've just created on the database. When the requirements are met, it's **mandatory** that the **data are merged**.
-
-This new source data must meet the following requirements:
-
-- Input file format: CSV
-- Data treatment
-    - **Name:** upper case text
-    - **zip:** a five digit text
-    - **website:** lower case text
-- Parameters
-    - Name: string
-    - Zip: string 
-    - Website: string
-
-Build an API to **integrate** `website` data field into the entity records you've just created using **HTTP protocol**.
-
-An id field is non existent on the data source, so you'll have to use the available fields to aggregate the new attribute **website** and store it. If the record doesn't exist, discard it.
-
-support file: q2_clientData.csv
+- ElasticSearch - Version 6.2.4 (see [Install Elasticsearch with Debian Package](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html));
+- Python - Version 3.6;
+- Flask (and dependencies);
+- Swagger.
 
 
-### Extra - Matching API to retrieve data
+## Project's Structure
+```
 
-Now Yawoen wants to create an API to provide information getting companies information from the entity to a client. 
-The parameters would be `name` and `zip` fields. To query on the database an **AND** logic operator must be used between the fields.
+| - api \
+    \ - config
+        \ - default.py
+        \ - app_module.py
+        \ - doc_module.py
+    \ - controller 
+        \ - custom
+            \ - __init__.py
+            \ - custom_api_error.py
+        \ - swagger
+            \ - data_api_controller_get.yml
+            \ - data_api_controller_post.yml
+            \ - data_api_controller_put.yml
+        \ - tests
+            \ - __init__.py
+            \ - data_api_controller_tests.py
+        \ - __init__.py
+        \ - data_api_controller.py
+    \ - integration
+        \ - tests
+            \ - data_process_tests.py
+        \ - __init__.py
+        \ - data_process.py
+    \ - __init__.py
+    \ - requeriments.txt
+    \ - run.py
+| - README.md
+| - Makefile
 
-You will need to have a matching strategy because the client might only have a part of the company name. 
-Example: "Yawoen" string from "Yawoen Business Solutions".
+```
 
-Output example: 
- ```
- {
- 	"id": "abc-1de-123fg",
- 	"name": "Yawoen Business Solutions",
- 	"zip":"10023",
- 	"website": "www.yawoen.com"
- }
- ```
+## Install Requirements (Python Libraries)
 
-## Notes
+```
+   pip install -r api/requirements.txt
+```
 
 
-- Make sure other developers can easily run the application locally.
-- Yawoen isn't picky about the programming language, the database and other tools that you might choose. Just take notice of the market before making your decision.
-- Automated tests are mandatory.
-- Document your API if you are willing to.
+## Running API
+
+```
+    cd api/
+    python run.py
+```
+
+## Running Tests
 
 
-## Deliverable
+```
+   python -m unittest discover -p *tests.py
+```
+
+## Design
+
+* DataProcess: class responsible to process the CSV file. It's responsible for load initial data in the database,
+update and retrieve data.
+
+* DataApiController: class responsible for API. Process HTTP requests. 
+
+## Strategy
+
+1. When you insert a new object into the database, a hash code (SHA256) is created 
+from the data (name and addresszip fields). This hash code will serve to identify the object on the future.
+
+2. To update an object, the hash code (from name and addresszip fields) is used. 
+
+3. To retrieve objects, it's possible to use 'search' (query string) for filter objects.
 
 
-- It would be REALLY nice if it was hosted in a git repo of your own. You can create a new empty project, create a branch and Pull Request it to the master branch. Provide the PR URL for us. BUT if you'd rather, just compress this directory and send it back to us.
-- Make sure Yawoen folks will have access to the source code.
-- Fill the **Makefile** targets with the apropriated commands (**TODO** tags).
+## Examples
 
-Have fun!
+* POST
+```
+curl -X POST \
+  http://0.0.0.0:5000/data-integration \
+  -H 'content-type: multipart/form-data' \
+  -F file=@./data/q1_catalog.csv
+```
+
+* PUT 
+```
+curl -X PUT \
+  http://0.0.0.0:5000/data-integration \
+  -H 'content-type: multipart/form-data' \
+  -F file=@data/q2_clientData.csv
+```
+
+* GET 
+
+```
+curl -X GET \
+  http://0.0.0.0:5000/data-integration \
+  -H 'Content-Type: application/json'
+```
+
+* GET (with search for name='redbox') 
+
+```
+curl -X GET \
+  'http://0.0.0.0:5000/data-integration?name=redbox' \
+  -H 'Content-Type: application/json'
+```
+
+* GET (with search for name='group' and zip='78229') 
+
+```
+curl -X GET \
+  'http://0.0.0.0:5000/data-integration?name=group&zip=78229' \
+  -H 'Content-Type: application/json'
+```

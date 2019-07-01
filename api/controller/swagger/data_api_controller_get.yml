@@ -1,0 +1,53 @@
+Retrieve data from databese
+
+- GET
+
+curl -X GET "http://{{url}}/data-integration" -H "Content-Type:application/json"
+
+- GET (with search for name = 'redbox')
+
+curl -X GET "http://{{url}}/data-integration?name=redbox" -H "Content-Type:application/json"
+
+- GET (with search for name = 'group' and zip = 78229)
+
+curl -X GET "http://{{url}}/data-integration?name=group&zip=78229" -H "Content-Type:application/json"
+
+---
+tags:
+  - data-integration
+definitions:
+  Data:
+    type: object
+    properties:
+      name:
+        type: string
+      zip:
+        type: string
+      website:
+        type: string
+parameters:
+- in: query
+  name: name
+  schema:
+    type: string
+  required: false
+  description: Key for search in 'name' field.
+- in: query
+  name: zip
+  schema:
+    type: string
+  required: false
+  description: Key for search in 'zip' field.
+- in: query
+  name: scroll_id
+  schema:
+    type: string
+  required: false
+  description: The next page
+produces:
+  - application/json
+responses:
+  200:
+    description: List of objects from the database
+    schema:
+      $ref: '#/definitions/Data'
